@@ -3,6 +3,8 @@ import { useSession } from "next-auth/react";
 import Head from "next/head";
 import { useState } from "react";
 import { Header } from "~/components/Header";
+import { NoteCard } from "~/components/NoteCard";
+import { NoteEditor } from "~/components/NoteEditor";
 
 import { api, type RouterOutputs } from "~/utils/api";
 
@@ -47,6 +49,47 @@ const Content = () => {
     },
   });
 
+  const { data: notes, refetch: refetchNotes } = api.note.getAll.useQuery(
+    {
+      topicId: selectedTopic?.id ?? "",
+    },
+    {
+      enabled: sessionData?.user !== undefined,
+    }
+  );
+
+  const createNote = api.note.create.useMutation({
+    onSuccess: () => {
+      void refetchNotes();
+    },
+  });
+
+  const handleSave = ({
+    title,
+    content,
+  }: {
+    title: string;
+    content: string;
+  }) => {
+    if (selectedTopic) {
+      void createNote.mutate({
+        title,
+        content,
+        topicId: selectedTopic?.id,
+      });
+    }
+  };
+
+  const deleteNote = api.note.delete.useMutation({
+    onSuccess: () => {
+      void refetchNotes();
+    },
+  });
+
+  const handleDelete = (id: string) => {
+    void deleteNote.mutate({ id });
+  };
+
   return (
     <div className="mx-5 mt-5 grid grid-cols-4 gap-2">
       <div className="px-2">
@@ -80,7 +123,14 @@ const Content = () => {
           }}
         />
       </div>
-      <div className="col-span-3"></div>
+      <div className="col-span-3">
+        <div>
+          {notes?.map((note) => (
+            <NoteCard key={note.id} note={note} onDelete={handleDelete} />
+          ))}
+        </div>
+        <NoteEditor onSave={handleSave} />
+      </div>
     </div>
   );
 };
