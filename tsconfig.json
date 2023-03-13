@@ -16,7 +16,6 @@
     "jsx": "preserve",
     "incremental": true,
     "noUncheckedIndexedAccess": true,
-    "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"]
     }
@@ -29,5 +28,5 @@
     "**/*.cjs",
     "**/*.mjs"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "tailwind.config.js"]
 }
